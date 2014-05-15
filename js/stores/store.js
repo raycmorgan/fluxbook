@@ -18,10 +18,10 @@ var Store = merge(EventEmitter.prototype, {
   },
 
   addHandler: function (actionType, callback) {
-    this.handlers[actionType] = callback;
+    this.handlers[actionType] = callback.bind(this);
   },
 
-  registerWithDispatcher: function (dispatcher, callback) {
+  registerWithDispatcher: function (dispatcher) {
     var handlers = this.handlers;
 
     this.dispatchIndex = dispatcher.register(function (payload) {

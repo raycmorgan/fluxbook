@@ -1,38 +1,3 @@
-// var storeCallbacks = [];
-// 
-// var dispatch = function (payload) {
-//   return storeCallbacks.every(function (callback) {
-//     return callback(payload);
-//   });
-// }
-// 
-// module.exports = {
-//   register: function (callback) {
-//     storeCallbacks.push(callback);
-//     return storeCallbacks.length - 1;
-//   },
-// 
-//   registerHandlers: function (handlers) {
-//     return this.register(function (payload) {
-//       var action = payload.action;
-// 
-//       if (typeof handlers[action.actionType] === 'function') {
-//         return handlers[action.actionType](action);
-//       } else {
-//         return true;
-//       }
-//     });
-//   },
-// 
-//   handleViewAction: function (action) {
-//     return dispatch({
-//       source: 'VIEW_ACTION',
-//       action: action
-//     });
-//   }
-// };
-
-
 var merge = require('react/lib/merge');
 var Dispatcher = require('./dispatcher');
 

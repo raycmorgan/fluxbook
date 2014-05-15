@@ -1,17 +1,15 @@
 /** @jsx React.DOM */
 
-var EventEmitter = require('events').EventEmitter;
-var merge = require('react/lib/merge');
+// var merge = require('react/lib/merge');
+var Store = require('./store');
 var AppDispatcher = require('../dispatchers/app_dispatcher');
-var gistConstants = require('../constants/gist_constants');
+var C = require('../constants/gist_constants');
 var GithubStore = require('./github_store');
-
-var CHANGE_EVENT = 'CHANGE_EVENT';
 
 var gists = [];
 var isLoading = false;
 
-GistStore = merge(EventEmitter.prototype, {
+var GistStore = Store.create({
   getAllGists: function () {
     return gists;
   },
@@ -30,44 +28,34 @@ GistStore = merge(EventEmitter.prototype, {
 
   isLoading: function () {
     return isLoading;
-  },
-
-  addChangeListener: function (fn) {
-    this.on(CHANGE_EVENT, fn);
-  },
-
-  removeChangeListener: function (fn) {
-    this.removeListener(CHANGE_EVENT, fn);
   }
 });
 
-function emitChange() {
-  GistStore.emit(CHANGE_EVENT);
-}
+// Dispatch handlers
 
-GistStore.dispatchIndex = AppDispatcher.register(function (payload) {
-  var action = payload.action;
+GistStore.registerWithDispatcher(AppDispatcher);
 
-  switch (action.actionType) {
-    case gistConstants.GITHUB_AUTHENTICATED:
-      return handleGithubAuthenticated(action);
-
-    default:
-      return true;
-  }
+GistStore.addHandler(C.GITHUB_AUTHENTICATED, function (action) {
+  AppDispatcher.waitFor([GithubStore], refreshGists);
 });
 
-function handleGithubAuthenticated(action) {
-  AppDispatcher.waitFor([GithubStore], function () {
-    isLoading = true;
+
+// Internal Helpers
+
+var emitChange = GistStore.emitChange;
+
+function refreshGists() {
+  isLoading = true;
+  emitChange();
+
+  GithubStore.client().gists(function (err, data) {
+    isLoading = false;
+    gists = data;
     emitChange();
-
-    GithubStore.client().gists(function (err, data) {
-      isLoading = false;
-      gists = data;
-      emitChange();
-    });
   });
 }
 
-module.exports = GistStore;
+
+// Exports
+
+module.exports = GistStore.finalize();

@@ -2,8 +2,9 @@
 
 var Store = require('./store');
 var AppDispatcher = require('../dispatchers/app_dispatcher');
-var C = require('../constants/gist_constants');
+var C = require('../constants');
 var Github = require('../lib/github');
+var GistActions = require('../actions/gist_actions');
 
 var client = null;
 
@@ -16,9 +17,11 @@ var GithubStore = Store.create({
 var emitChange = GithubStore.emitChange;
 
 GithubStore.registerWithDispatcher(AppDispatcher);
-GithubStore.addHandler(C.GITHUB_AUTHENTICATED, function (action) {
+GithubStore.addHandler(C.GITHUB.AUTHENTICATED, function (action) {
   client = Github(action.token);
+  localStorage.githubToken = action.token
+
   emitChange();
-})
+});
 
 module.exports = GithubStore.finalize();

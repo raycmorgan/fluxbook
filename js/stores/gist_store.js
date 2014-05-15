@@ -3,7 +3,7 @@
 // var merge = require('react/lib/merge');
 var Store = require('./store');
 var AppDispatcher = require('../dispatchers/app_dispatcher');
-var C = require('../constants/gist_constants');
+var C = require('../constants');
 var GithubStore = require('./github_store');
 
 var gists = [];
@@ -35,7 +35,7 @@ var GistStore = Store.create({
 
 GistStore.registerWithDispatcher(AppDispatcher);
 
-GistStore.addHandler(C.GITHUB_AUTHENTICATED, function (action) {
+GistStore.addHandler(C.GITHUB.AUTHENTICATED, function (action) {
   AppDispatcher.waitFor([GithubStore], refreshGists);
 });
 

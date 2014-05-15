@@ -4,11 +4,15 @@ var React = require('react');
 
 var GistAppView = require('./components/gist_app_view');
 var GistStore = require('./stores/gist_store');
-var GistAction = require('./actions/gist_actions');
+var GistActions = require('./actions/gist_actions');
+
+if (localStorage.githubToken) {
+  GistActions.githubAuthenticated(localStorage.githubToken);
+}
 
 // OAuth
 OAuth.initialize('rRW8z4osjyMGc2rtUmJJm0U1qso');
 
 React.renderComponent(
-  <GistAppView gistStore={GistStore} gistActions={GistAction} />,
+  <GistAppView gistStore={GistStore} gistActions={GistActions} />,
   document.body);

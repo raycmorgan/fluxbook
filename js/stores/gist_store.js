@@ -5,9 +5,10 @@ var Store = require('./store');
 var AppDispatcher = require('../dispatchers/app_dispatcher');
 var C = require('../constants');
 var GithubStore = require('./github_store');
+var db = require('../lib/db');
 
 var gists = [];
-var isLoading = false;
+var isSyncing = false;
 
 var GistStore = Store.create({
   getAllGists: function () {
@@ -26,8 +27,8 @@ var GistStore = Store.create({
     });
   },
 
-  isLoading: function () {
-    return isLoading;
+  isSyncing: function () {
+    return isSyncing;
   }
 });
 
@@ -45,15 +46,76 @@ GistStore.addHandler(C.GITHUB.AUTHENTICATED, function (action) {
 var emitChange = GistStore.emitChange;
 
 function refreshGists() {
-  isLoading = true;
+  isSyncing = true;
   emitChange();
 
-  GithubStore.client().gists(function (err, data) {
-    isLoading = false;
-    gists = data;
+  var stream = GithubStore.client().gistStream();
+  var _gists = [];
+
+  stream.on('data', function (data) {
+    console.log('Loaded page:', data);
+
+    var hasChange = false;
+
+    _gists = _gists.concat(data);
+    gists = _gists;
+
+    _gists.forEach(function (gist) {
+      db.get('gists', gist['id'], function (err, obj) {
+        if (err) {
+          return console.error(err);
+        }
+
+        if (obj) {
+          if (obj['updated_at'] != gist['updated_at']) {
+            hasChange = true;
+            db.put('gists', gist, function (err) {
+              if (err) { console.error(err); }
+            });
+          } else {
+            console.log('No change to gist: %s', gist['id'])
+          }
+        } else {
+          hasChange = true;
+          db.put('gists', gist, function (err) {
+            if (err) { console.error(err); }
+          });
+        }
+      });
+    });
+
+    if (hasChange) {
+      fetchThenChange();
+    }
+  });
+
+  stream.on('error', function (err) {
+    console.error(err);
+    end();
+  });
+
+  stream.on('end', end);
+
+  function end() {
+    isSyncing = false;
+    fetchThenChange();
+  }
+}
+
+function fetchThenChange() {
+  var keyRange = IDBKeyRange.lowerBound("");
+
+  db.allByIndex('gists', 'updated_at', keyRange, function (err, results) {
+    if (err) {
+      return console.error(err);
+    }
+
+    gists = results.reverse();
     emitChange();
   });
 }
+
+fetchThenChange();
 
 
 // Exports

@@ -1,18 +1,25 @@
 /** @jsx React.DOM */
 
 var React = require('react');
+var db = require('./lib/db');
 
-var GistAppView = require('./components/gist_app_view');
-var GistStore = require('./stores/gist_store');
-var GistActions = require('./actions/gist_actions');
+db.open(function (err) {
+  if (err) {
+    return console.error(err);
+  }
 
-if (localStorage.githubToken) {
-  GistActions.githubAuthenticated(localStorage.githubToken);
-}
+  var GistAppView = require('./components/gist_app_view');
+  var GistStore = require('./stores/gist_store');
+  var GistActions = require('./actions/gist_actions');
 
-// OAuth
-OAuth.initialize('rRW8z4osjyMGc2rtUmJJm0U1qso');
+  if (localStorage.githubToken) {
+    GistActions.githubAuthenticated(localStorage.githubToken);
+  }
 
-React.renderComponent(
-  <GistAppView gistStore={GistStore} gistActions={GistActions} />,
-  document.body);
+  // OAuth
+  OAuth.initialize('rRW8z4osjyMGc2rtUmJJm0U1qso');
+
+  React.renderComponent(
+    <GistAppView gistStore={GistStore} gistActions={GistActions} />,
+    document.body);
+});

@@ -26,7 +26,7 @@ var GistAppView = React.createClass({
     return {
       publicGists: this.props.gistStore.getPublicGists(),
       privateGists: this.props.gistStore.getPrivateGists(),
-      loadingGists: this.props.gistStore.isLoading()
+      isSyncing: this.props.gistStore.isSyncing()
     }
   },
 
@@ -39,31 +39,29 @@ var GistAppView = React.createClass({
   },
 
   render: function () {
-    if (this.state.loadingGists) {
-      var loading = <p>Loading Gists...</p>
+    var dom = [];
+
+    if (!this.state.publicGists.length && !this.state.isSyncing) {
+      dom.push(<div key="auth"><GithubAuthView onAuth={this.handleAuth} /></div>);
+    }
+
+    if (this.state.isSyncing) {
+      dom.push(<p key="syncing">Syncing Gists...</p>);
+    }
+
+    if (this.state.publicGists.length) {
+      dom.push(<GistListView key="public-gists" title="Public Gists" gists={this.state.publicGists} />)
+    }
+
+    if (this.state.privateGists.length) {
+      dom.push(<GistListView key="private-gists" title="Private Gists" gists={this.state.privateGists} />)
     }
 
     return (
       <div>
-        {loading}
-        {this.renderGists()}
+        {dom}
       </div>
     );
-  },
-
-  renderGists: function () {
-    if (this.state.publicGists.length) {
-      return (
-        <div>
-          <GistListView title="Public Gists" gists={this.state.publicGists} />
-          <GistListView title="Private Gists" gists={this.state.privateGists} />
-        </div>
-      );
-    } else if (!this.state.loadingGists) {
-      return <div><GithubAuthView onAuth={this.handleAuth} /></div>;
-    } else {
-      return null;
-    }
   }
 });
 

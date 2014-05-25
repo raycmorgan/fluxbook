@@ -13,7 +13,8 @@
     "reactify": "~0.13.1",
     "statics": "~0.1.0",
     "uglify-js": "~2.4.13",
-    "watchify": "~0.10.0"
+    "watchify": "~0.10.0",
+    "reqwest": "^1.1.0"
   },
   "scripts": {
     "start": "STATIC_ROOT=./static watchify -o js/bundle.js -v -d .",

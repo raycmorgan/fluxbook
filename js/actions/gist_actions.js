@@ -7,6 +7,13 @@ var GistActions = {
       actionType: C.GITHUB.AUTHENTICATED,
       token: token
     });
+  },
+
+  gistSelected: function (id) {
+    AppDispatcher.handleViewAction({
+      actionType: C.GIST.SELECTED,
+      gistId: id
+    });
   }
 };
 

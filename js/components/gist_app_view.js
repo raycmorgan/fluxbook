@@ -26,7 +26,8 @@ var GistAppView = React.createClass({
     return {
       publicGists: this.props.gistStore.getPublicGists(),
       privateGists: this.props.gistStore.getPrivateGists(),
-      isSyncing: this.props.gistStore.isSyncing()
+      isSyncing: this.props.gistStore.isSyncing(),
+      selectedGist: this.props.gistStore.selectedGist()
     }
   },
 
@@ -50,11 +51,11 @@ var GistAppView = React.createClass({
     }
 
     if (this.state.publicGists.length) {
-      dom.push(<GistListView key="public-gists" title="Public Gists" gists={this.state.publicGists} />)
+      dom.push(<GistListView key="public-gists" title="Public Gists" gists={this.state.publicGists} selected={this.state.selectedGist} />)
     }
 
     if (this.state.privateGists.length) {
-      dom.push(<GistListView key="private-gists" title="Private Gists" gists={this.state.privateGists} />)
+      dom.push(<GistListView key="private-gists" title="Private Gists" gists={this.state.privateGists} selected={this.state.selectedGist} />)
     }
 
     return (

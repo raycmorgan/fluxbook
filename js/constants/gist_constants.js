@@ -1,4 +1,3 @@
-var keyMirror = require('react/lib/keyMirror');
-
-module.exports = keyMirror({
-});
+module.exports = {
+  SELECTED: 'GIST.SELECTED'
+};

@@ -6,8 +6,10 @@ var AppDispatcher = require('../dispatchers/app_dispatcher');
 var C = require('../constants');
 var GithubStore = require('./github_store');
 var db = require('../lib/db');
+var _ = require('underscore');
 
 var gists = [];
+var selectedGist = null;
 var isSyncing = false;
 
 var GistStore = Store.create({
@@ -29,6 +31,10 @@ var GistStore = Store.create({
 
   isSyncing: function () {
     return isSyncing;
+  },
+
+  selectedGist: function () {
+    return selectedGist;
   }
 });
 
@@ -38,6 +44,11 @@ GistStore.registerWithDispatcher(AppDispatcher);
 
 GistStore.addHandler(C.GITHUB.AUTHENTICATED, function (action) {
   AppDispatcher.waitFor([GithubStore], refreshGists);
+});
+
+GistStore.addHandler(C.GIST.SELECTED, function (action) {
+  selectedGist = _.findWhere(gists, {id: action.gistId});
+  emitChange();
 });
 
 

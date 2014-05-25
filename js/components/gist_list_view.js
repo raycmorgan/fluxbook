@@ -5,8 +5,10 @@ var GistItemView = require('./gist_item_view');
 
 var GistListView = React.createClass({
   render: function () {
+    var props = this.props;
+ 
     var createGist = function (gist) {
-      return <GistItemView gist={gist} key={gist['id']} />
+      return <GistItemView selected={gist == props.selected} gist={gist} key={gist['id']} />
     }
 
     return (

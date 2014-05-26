@@ -1,6 +1,8 @@
 var reqwest = require('reqwest');
 var EventEmitter = require('events').EventEmitter;
 var db = require('./db');
+var Promise = require('es6-promise').Promise;
+var _ = require('underscore');
 
 function Github(token) {
   if (Github.cached[token]) {
@@ -71,6 +73,19 @@ function Github(token) {
       client.gists({page: page}, process);
 
       return e;
+    },
+
+    gistFiles: function (gist, callback) {
+      var fileNames = _.keys(gist['files']);
+
+      var promises = _.map(gist['files'], function (info, name) {
+        var url = info['raw_url'].replace('https://gist.githubusercontent.com', 'https://fluxbook-cors-proxy.herokuapp.com');
+        return getRaw(url);
+      });
+
+      Promise.all(promises).then(function (files) {
+        callback(null, _.object(fileNames, files));
+      }, callback);
     }
   };
 
@@ -89,6 +104,21 @@ function get(url, callback) {
     headers: {},
     error: function (err) { callback(err, null, r.request); },
     success: function (resp) { callback(null, resp, r.request); }
+  });
+}
+
+function getRaw(url) {
+  console.log('HTTP request: GET %s', url);
+
+  return new Promise(function (resolve, reject) {
+    var r = reqwest({
+      url: url,
+      method: 'get',
+      crossOrigin: true,
+      headers: {},
+      error: reject,
+      success: resolve
+    });
   });
 }
 

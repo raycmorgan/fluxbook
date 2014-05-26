@@ -2,6 +2,7 @@
 
 var React = require('react');
 var GistActions = require('../actions/gist_actions');
+var _ = require('underscore');
 
 var GistItemView = React.createClass({
   handleClick: function (e) {
@@ -11,16 +12,15 @@ var GistItemView = React.createClass({
     GistActions.gistSelected(this.props.gist['id']);
   },
 
+  renderTitle: function () {
+    return _.keys(this.props.gist['files']).join(', ');
+  },
+
   render: function () {
+
     return (
       <li className={this.props.selected ? 'selected' : ''} id={this.props.gist['id']} onClick={this.handleClick}>
-        <span>
-          ID: {this.props.gist['id']} 
-          <small>({this.props.gist['public'] ? 'public' : 'private'})</small>
-        </span><br />
-        <span>URL: <a href={this.props.gist['html_url']}>
-          {this.props.gist['html_url']}
-        </a></span>
+        {this.renderTitle()}
       </li>
     );
   }

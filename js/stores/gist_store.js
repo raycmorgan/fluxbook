@@ -10,6 +10,7 @@ var _ = require('underscore');
 
 var gists = [];
 var selectedGist = null;
+var selectedGistFiles = {};
 var isSyncing = false;
 
 var GistStore = Store.create({
@@ -34,7 +35,11 @@ var GistStore = Store.create({
   },
 
   selectedGist: function () {
-    return selectedGist;
+    return _.findWhere(gists, {id: selectedGist});
+  },
+
+  selectedGistFiles: function () {
+    return selectedGistFiles;
   }
 });
 
@@ -47,8 +52,18 @@ GistStore.addHandler(C.GITHUB.AUTHENTICATED, function (action) {
 });
 
 GistStore.addHandler(C.GIST.SELECTED, function (action) {
-  selectedGist = _.findWhere(gists, {id: action.gistId});
+  selectedGist = action.gistId;
   emitChange();
+
+  var gist = _.findWhere(gists, {id: selectedGist})
+  GithubStore.client().gistFiles(gist, function (err, files) {
+    if (err) {
+      return console.error(err);
+    }
+
+    selectedGistFiles = files;
+    emitChange();
+  });
 });
 
 
@@ -83,8 +98,6 @@ function refreshGists() {
             db.put('gists', gist, function (err) {
               if (err) { console.error(err); }
             });
-          } else {
-            console.log('No change to gist: %s', gist['id'])
           }
         } else {
           hasChange = true;
@@ -116,12 +129,12 @@ function refreshGists() {
 function fetchThenChange() {
   var keyRange = IDBKeyRange.lowerBound("");
 
-  db.allByIndex('gists', 'updated_at', keyRange, function (err, results) {
+  db.allByIndex('gists', 'updated_at', keyRange, {desc: true}, function (err, results) {
     if (err) {
       return console.error(err);
     }
 
-    gists = results.reverse();
+    gists = results;
     emitChange();
   });
 }

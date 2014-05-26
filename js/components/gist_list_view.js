@@ -8,11 +8,14 @@ var GistListView = React.createClass({
     var props = this.props;
  
     var createGist = function (gist) {
-      return <GistItemView selected={gist == props.selected} gist={gist} key={gist['id']} />
+      return <GistItemView 
+                selected={gist == props.selected}
+                gist={gist}
+                key={gist['id']} />
     }
 
     return (
-      <div>
+      <div id="gist-nav">
         <h3>{this.props.title}</h3>
         <ul>
           {this.props.gists.map(createGist)}

@@ -66,12 +66,16 @@ function all(name, callback) {
   cursorRequest.onerror = _error(callback);
 }
 
-function allByIndex(name, indexName, keyRange, callback) {
+function allByIndex(name, indexName, keyRange, opts, callback) {
   var txn = db.transaction([name], 'readonly');
   var store = txn.objectStore(name);
   var index = store.index(indexName);
 
-  var cursorRequest = index.openCursor(keyRange);
+  if (opts.desc) {
+    var cursorRequest = index.openCursor(keyRange, 'prev');
+  } else {
+    var cursorRequest = index.openCursor(keyRange);
+  }
 
   var values = [];
 

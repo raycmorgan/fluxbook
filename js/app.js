@@ -9,6 +9,7 @@ db.open(function (err) {
   }
 
   var GistAppView = require('./components/gist_app_view');
+  var GithubStore = require('./stores/github_store');
   var GistStore = require('./stores/gist_store');
   var GistActions = require('./actions/gist_actions');
 
@@ -20,6 +21,9 @@ db.open(function (err) {
   OAuth.initialize('rRW8z4osjyMGc2rtUmJJm0U1qso');
 
   React.renderComponent(
-    <GistAppView gistStore={GistStore} gistActions={GistActions} />,
+    <GistAppView
+      githubStore={GithubStore}
+      gistStore={GistStore}
+      gistActions={GistActions} />,
     document.body);
 });

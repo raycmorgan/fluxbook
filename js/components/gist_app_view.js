@@ -3,6 +3,7 @@
 var React = require('react');
 var GistListView = require('./gist_list_view');
 var GithubAuthView = require('./github_auth_view');
+var GistView = require('./gist_view');
 
 var GistAppView = React.createClass({
   propTypes: {
@@ -24,10 +25,11 @@ var GistAppView = React.createClass({
 
   getState: function () {
     return {
-      publicGists: this.props.gistStore.getPublicGists(),
-      privateGists: this.props.gistStore.getPrivateGists(),
+      gists: this.props.gistStore.getAllGists(),
       isSyncing: this.props.gistStore.isSyncing(),
-      selectedGist: this.props.gistStore.selectedGist()
+      selectedGist: this.props.gistStore.selectedGist(),
+      isAuthenticated: this.props.githubStore.isAuthenticated(),
+      files: this.props.gistStore.selectedGistFiles()
     }
   },
 
@@ -42,24 +44,27 @@ var GistAppView = React.createClass({
   render: function () {
     var dom = [];
 
-    if (!this.state.publicGists.length && !this.state.isSyncing) {
+    if (!this.state.isAuthenticated) {
       dom.push(<div key="auth"><GithubAuthView onAuth={this.handleAuth} /></div>);
     }
 
     if (this.state.isSyncing) {
-      dom.push(<p key="syncing">Syncing Gists...</p>);
+      dom.push(<p className="loading-message" key="syncing">Syncing Gists...</p>);
     }
 
-    if (this.state.publicGists.length) {
-      dom.push(<GistListView key="public-gists" title="Public Gists" gists={this.state.publicGists} selected={this.state.selectedGist} />)
+    if (this.state.gists.length) {
+      dom.push(<GistListView key="gists"
+                             title="All Gists"
+                             gists={this.state.gists}
+                             selected={this.state.selectedGist} />);
     }
 
-    if (this.state.privateGists.length) {
-      dom.push(<GistListView key="private-gists" title="Private Gists" gists={this.state.privateGists} selected={this.state.selectedGist} />)
+    if (this.state.selectedGist) {
+      dom.push(<GistView key="gist" gist={this.state.selectedGist} files={this.state.files} />);
     }
 
     return (
-      <div>
+      <div id="main">
         {dom}
       </div>
     );

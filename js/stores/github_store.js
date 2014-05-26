@@ -11,6 +11,10 @@ var client = null;
 var GithubStore = Store.create({
   client: function () {
     return client;
+  },
+
+  isAuthenticated: function () {
+    return !!client;
   }
 });
 
